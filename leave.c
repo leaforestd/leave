@@ -16,10 +16,10 @@ void main(int argc, char* argv[]) {
 	static int loop = 0;
 	unsigned int sleep_sec;
 	pid_t pid;
-	char arg_buf[MAXBUF];
+	int arg_buf[MAXBUF];
 	int index = 0;
 
-	if (argc == 1) { /* no given arg */
+	if (argc == 1) { /* no arg */
 		int input;
 
 		fprintf(stdout, "When do you have to leave?\n");
@@ -30,21 +30,27 @@ void main(int argc, char* argv[]) {
 		
 		while ((input != '\n') && (input != EOF) && (index < MAXBUF)) {
 			/* index: [0, 4] */
-			arg_buf[index++] = input; /* int -> char */
+			arg_buf[index++] = input;
 			input = getchar();
 		}
-	} else {
+	} else { /* deal with arg */
 		int i;
 		for (i = 0; i < MAXBUF; i++) {
-			arg_buf[i] = argv[1][i];
+			arg_buf[i] = argv[1][i] - '0'; /* ASCII -> int */
 		}
 	}
 
 	if (arg_buf[0] == '+') {
-		sleep_sec += (arg_buf[1] * 10 + arg_buf[2]) * 3600 + (arg_buf[3] * 10 + arg_buf[4]) * 60;
+		int j;
+		for (j = 1; j < MAXBUF; j++) {
+			arg_buf[j] -= '0';
+			printf("|%d|", arg_buf[j]);
+		}
+		printf("\n");
+		sleep_sec = (arg_buf[1] * 10 + arg_buf[2]) * 3600 + (arg_buf[3] * 10 + arg_buf[4]) * 60;
 		printf("sleep_sec: %d\n", sleep_sec);
 	} else {
-		if (arg_buf[0]< 0 || arg_buf[0] > 1 || arg_buf[1] < 0 || arg_buf[1] > 2 || arg_buf[2] < 0 || arg_buf[2] > 6 || arg_buf[3] < 0 || arg_buf[3] > 9) {
+		if (arg_buf[0]<0 || arg_buf[0]>1 || arg_buf[1]<0 || arg_buf[1]>2 || arg_buf[2]<0 || arg_buf[2]>6 || arg_buf[3]<0 || arg_buf[3]>9) {
 			printf("invalid input, exit..\n");
 			return;
 		}
