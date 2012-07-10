@@ -22,7 +22,7 @@ void main(int argc, char* argv[]) {
 	if (argc == 1) { /* no arg */
 		int input;
 
-		fprintf(stdout, "When do you have to leave?\n");
+		printf("When do you have to leave?\n");
 		while ((input = getchar()) == ' ') {;}
 		/* first non-blank character */
 		if ((input == '\n') || (input == EOF)) /* blank line, terminate */
@@ -44,9 +44,8 @@ void main(int argc, char* argv[]) {
 		int j;
 		for (j = 1; j < MAXBUF; j++) {
 			arg_buf[j] -= '0';
-			printf("|%d|", arg_buf[j]);
 		}
-		printf("\n");
+
 		sleep_sec = (arg_buf[1] * 10 + arg_buf[2]) * 3600 + (arg_buf[3] * 10 + arg_buf[4]) * 60;
 		printf("sleep_sec: %d\n", sleep_sec);
 	} else {
@@ -69,10 +68,10 @@ void main(int argc, char* argv[]) {
 		loop++;
 	}	
 	/* forced to leave */
-	fprintf(stdout, "that's the last time I'll tell you. Bye.\n");
-	char* execve_argv[] = {"shutdown", "now", NULL};
+	printf("that's the last time I'll tell you. Bye.\n");
+	char* execve_argv[] = {"usr/sbin/shutdown", "now", NULL};
 	char* execve_environ[] = {NULL};
-	execve(argv[0], execve_argv, execve_environ);
+	execve(execve_argv[0], execve_argv, execve_environ);
 }
 
 void unix_error(char* msg) {
