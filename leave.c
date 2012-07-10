@@ -4,6 +4,7 @@
 #include <sys/types.h>
 #include <string.h>
 #include <errno.h>
+#include <time.h>
 
 #define MAXBUF 5 /* [+]hhmm */
 
@@ -13,7 +14,7 @@ char* Fgets(char* s, int size, FILE* stream);
 
 void main(int argc, char* argv[]) {
 	static int loop = 0;
-	unsigned int seconds;
+	unsigned int sleep_sec;
 	pid_t pid;
 	char arg_buf[MAXBUF];
 	int index = 0;
@@ -27,9 +28,9 @@ void main(int argc, char* argv[]) {
 		if ((input == '\n') || (input == EOF)) /* blank line, terminate */
 			return;
 		
-		while ((input != '\n') && (input != EOF)) {
-			if (index < MAXBUF)
-				arg_buf[index++] = input; /* int -> char */
+		while ((input != '\n') && (input != EOF) && (index < MAXBUF)) {
+			/* index: [0, 4] */
+			arg_buf[index++] = input; /* int -> char */
 			input = getchar();
 		}
 	} else {
@@ -38,13 +39,24 @@ void main(int argc, char* argv[]) {
 			arg_buf[i] = argv[1][i];
 		}
 	}
+
+	if (arg_buf[0] == '+') {
+		sleep_sec += (arg_buf[1] * 10 + arg_buf[2]) * 3600 + (arg_buf[3] * 10 + arg_buf[4]) * 60;
+		printf("sleep_sec: %d\n", sleep_sec);
+	} else {
+		if (arg_buf[0]< 0 || arg_buf[0] > 1 || arg_buf[1] < 0 || arg_buf[1] > 2 || arg_buf[2] < 0 || arg_buf[2] > 6 || arg_buf[3] < 0 || arg_buf[3] > 9) {
+			printf("invalid input, exit..\n");
+			return;
+		}
+	}
+
 	
 	if ((pid = Fork()) > 0)
-		/* terminate parent */
+		/* terminate your parent, deamon */
 		return;
 
 	/* sleep, my lonely child */
-	sleep(seconds);
+	sleep(sleep_sec);
 	while (loop <  8) { /* loop 9 times */
 		fprintf(stdout, "time to leave!\n");
 		sleep(60);
@@ -67,15 +79,14 @@ int Fork(void) {
 	
 	if ((pid = fork()) < 0)
 		unix_error("fork error");
-
 	return pid;
 }
 
 char* Fgets(char* s, int size, FILE* stream) {
 	char* ptr;
+
 	if ((ptr = fgets(s, size, stream)) == NULL)
 		unix_error("fgets error");
-
 	return ptr;
 }
 
