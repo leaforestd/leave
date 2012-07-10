@@ -1,10 +1,11 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <unistd.h>
 #include <sys/types.h>
 #include <string.h>
 #include <errno.h>
 
-#define MAXBUF 128
+#define MAXBUF 5 /* [+]hhmm */
 
 void unix_error(char* msg);
 int Fork(void);
@@ -14,20 +15,28 @@ void main(int argc, char* argv[]) {
 	static int loop = 0;
 	unsigned int seconds;
 	pid_t pid;
-	int buf[MAXBUF];
-	int* bufptr = buf;
+	char arg_buf[MAXBUF];
+	int index = 0;
 
 	if (argc == 1) { /* no given arg */
+		int input;
+
 		fprintf(stdout, "When do you have to leave?\n");
-		int c = getchar();
-		while (c == ' ')
-			c = getchar();
-		if (c == '\n') /* blank line */
+		while ((input = getchar()) == ' ') {;}
+		/* first non-blank character */
+		if ((input == '\n') || (input == EOF)) /* blank line, terminate */
 			return;
 		
-		while (c != '\n') {
-			}
-
+		while ((input != '\n') && (input != EOF)) {
+			if (index < MAXBUF)
+				arg_buf[index++] = input; /* int -> char */
+			input = getchar();
+		}
+	} else {
+		int i;
+		for (i = 0; i < MAXBUF; i++) {
+			arg_buf[i] = argv[1][i];
+		}
 	}
 	
 	if ((pid = Fork()) > 0)
@@ -43,9 +52,9 @@ void main(int argc, char* argv[]) {
 	}	
 	/* forced to leave */
 	fprintf(stdout, "that's the last time I'll tell you. Bye.\n");
-	char* argv[] = {"shutdown", "now", NULL};
-	char* environ[] = {NULL};
-	execve(argv[0], argv, environ);
+	char* execve_argv[] = {"shutdown", "now", NULL};
+	char* execve_environ[] = {NULL};
+	execve(argv[0], execve_argv, execve_environ);
 }
 
 void unix_error(char* msg) {
@@ -63,7 +72,8 @@ int Fork(void) {
 }
 
 char* Fgets(char* s, int size, FILE* stream) {
-	if ((char* ptr = fgets(s, size, stream)) == NULL)
+	char* ptr;
+	if ((ptr = fgets(s, size, stream)) == NULL)
 		unix_error("fgets error");
 
 	return ptr;
