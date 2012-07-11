@@ -7,10 +7,16 @@
 #include <time.h>
 #include <ctype.h>
 
+typedef struct hm {
+	int h;
+	int m;
+} hm;
+
 void unix_error(char* msg);
 int Fork(void);
 char* Fgets(char* s, int size, FILE* stream);
 void invalid_input(void);
+void count_sleep_hm(hm* now, hm* shutdown, hm* sleep);
 
 void main(int argc, char* argv[]) {
 	static int loop = 0;
@@ -29,19 +35,19 @@ void main(int argc, char* argv[]) {
 			return;
 		
 		while ((input != '\n') && (input != EOF) && (index < 5)) {
-			arg_buf[index++] = input; /* index: [0, 4] */
+			arg_buf[index++] = input;
 			input = getchar();
 		}
 
 	} else { /* have arg */
 		for (i = 0; i < 5; i++) {
-			arg_buf[i] = argv[1][i] - '0'; /* ASCII -> int */
+			arg_buf[i] = argv[1][i];
 		}
 	}
 
 	if (arg_buf[0] == '+') { /* +hhmm */
 		for (j = 1; j < 5; j++) {
-			arg_buf[j] -= '0';
+			arg_buf[j] -= '0'; /* ASCII -> int */
 			/* check arg_buf */
 			if (arg_buf[j] < 0 || arg_buf[j] > 9)  
 				invalid_input();
@@ -52,17 +58,31 @@ void main(int argc, char* argv[]) {
 
 	} else { /* hhmm */
 		for (j = 0; j < 5 - 1; j++) {
-			arg_buf[j] -= '0';
+			arg_buf[j] -= '0'; /* ASCII -> int */
 			/* check arag_buf */
 			if (arg_buf[j] < 0 || arg_buf[j] > 9) 
 				invalid_input();
 		}
 
-		if (arg_buf[0]>2 || arg_buf[2]>6) {
+		if (arg_buf[0]>2 || arg_buf[2]>6) 
+			invalid_input();
+		if ((arg_buf[0] == 2) && (arg_buf[1] > 3))
 			invalid_input();
 
-		time_t time_sec = time(NULL);
-		struct tm *time_stc = localtime(&time_sec);
+		time_t sec = time(NULL);
+		struct tm *now_ptr = localtime(&sec);
+
+		hm* now = (hm*) malloc(sizeof(hm));
+		hm* shutdown = (hm*) malloc(sizeof(hm));
+		hm* sleep = (hm*) malloc(sizeof(hm));
+
+		now->h = now_ptr->tm_hour;
+		now->m = now_ptr->tm_min;
+		shutdown->h = arg_buf[0] * 10 + arg_buf[1];
+		shutdown->m = arg_buf[2] * 10 + arg_buf[3];
+
+		count_sleep_hm(now, shutdown, sleep);
+		sleep_sec = sleep->h * 3600 + sleep->m * 60;
 	}
 
 	
@@ -106,6 +126,18 @@ char* Fgets(char* s, int size, FILE* stream) {
 }
 
 void invalid_input(void) {
-	printf("leave: usage: leave [+]hhmm\n");
-	return;
+	printf("leave: invalid input\nusage: leave [+]hhmm\n");
+	exit(0);
+}
+
+void count_sleep_hm(hm* now, hm* shutdown, hm* sleep) {
+	sleep->h = shutdown->h - now->h;
+	if (sleep->h < 0)
+		sleep->h += 24;
+
+	sleep->m = shutdown->m - now->m;
+	if (sleep->m < 0) {
+		sleep->m += 60;
+		sleep->h--;
+	}
 }
