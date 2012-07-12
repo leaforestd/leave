@@ -54,8 +54,6 @@ void main(int argc, char* argv[]) {
 		}
 
 		sleep_sec = (arg_buf[1] * 10 + arg_buf[2]) * 3600 + (arg_buf[3] * 10 + arg_buf[4]) * 60; /* int -> unsigned, seems no problem? */
-		printf("sleep_sec: %d\n", sleep_sec);
-
 	} else { /* hhmm */
 		for (j = 0; j < 5 - 1; j++) {
 			arg_buf[j] -= '0'; /* ASCII -> int */
@@ -83,11 +81,15 @@ void main(int argc, char* argv[]) {
 
 		count_sleep_hm(now, shutdown, sleep);
 		sleep_sec = sleep->h * 3600 + sleep->m * 60;
+
+		free(now);
+		free(shutdown);
+		free(sleep);
 	}
 
 	
 	if ((pid = Fork()) > 0)
-		/* terminate your parent, deamon */
+	/* terminate your parent, deamon */
 		return;
 
 	/* sleep, my lonely child */
