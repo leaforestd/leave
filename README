@@ -8,15 +8,21 @@ SYNOPSIS
 
 DESCRIPTION
 		
-	Leave waits until the specified time, then reminds you thatyou have to leave. You are reminded at the time, and everyminute after for 9 times. At 10 minutes after thespecified time, leave calls shutdown to force you to leave.
+	Leave waits until the specified time, then reminds you thatyou have to 
+	leave. You are reminded at the time, and everyminute after for 9 times. 
+	At 10 minutes after thespecified time, leave calls shutdown to force
+	you to leave.
 
 	the following options are available:
 
 	hhmm	Set the specified time. The time is assumed in the next 24 hours.
 
-	+   	If the time is preceded by '+', the alarm will go off in hours and minutes from the current time.
+	+   	If the time is preceded by '+', the alarm will go off in hours 
+			and minutes from the current time.
 
-	If no argument is given, leave prompts with "When do you have to leave?". A reply of new line causes leave to exit, otherwise the reply is assumed to be the time.
+	If no argument is given, leave prompts with "When do you have to leave?".
+	A reply of new line causes leave to exit, otherwise the reply is assumed
+	to be the time.
 
 	To get rid of leave you should either leave or kill the process.
 	
